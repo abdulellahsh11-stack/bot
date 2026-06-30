@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة المالك — Whiteout Bot</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;color:#e8e8f0;background:#06150e}
+.stage{min-height:100vh;background:
+  radial-gradient(circle at 15% 20%,rgba(212,175,55,.16),transparent 40%),
+  radial-gradient(circle at 85% 15%,rgba(212,175,55,.18),transparent 40%),
+  radial-gradient(circle at 50% 90%,rgba(212,175,55,.12),transparent 45%),
+  linear-gradient(160deg,#06150e 0%,#0b2c1b 50%,#07180f 100%);
+  display:flex;flex-direction:column;position:relative;overflow:hidden}
+.glass{background:rgba(255,255,255,.07);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(212,175,55,.22);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.screen{display:none}.screen.on{display:flex;flex-direction:column;flex:1}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;flex-wrap:wrap;gap:8px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:#fff}
+.lbox{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#1f8a52,#d4af37);display:flex;align-items:center;justify-content:center;font-size:17px}
+.pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.pg{background:rgba(34,197,94,.18);color:#4ade80}.pp{background:rgba(212,175,55,.18);color:#eccf6a}.pr{background:rgba(239,68,68,.18);color:#f87171}
+.tabs{display:flex;gap:5px;padding:4px 18px;overflow-x:auto}
+.tab{padding:8px 14px;font-size:12px;color:#94a3b8;cursor:pointer;border-radius:11px;white-space:nowrap;flex-shrink:0;transition:.2s;background:rgba(255,255,255,.03);border:1px solid transparent}
+.tab:hover{background:rgba(255,255,255,.07);color:#cbd5e1}
+.tab.on{background:rgba(212,175,55,.22);color:#fff;border-color:rgba(212,175,55,.35)}
+.main{flex:1;padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.chd{padding:11px 15px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between}
+.cht{font-weight:600;font-size:13px;color:#fff}
+.sc{padding:13px 15px;border-radius:13px}
+.scl{font-size:10px;color:#94a3b8;margin-bottom:5px}
+.scv{font-size:22px;font-weight:600}
+.vg{color:#4ade80}.vb{color:#3fb37a}.vp{color:#eccf6a}.vr{color:#f87171}.va{color:#fbbf24}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:9px 11px;font-size:10.5px;color:#94a3b8;font-weight:500;text-align:right;border-bottom:1px solid rgba(255,255,255,.07)}
+.tbl td{padding:10px 11px;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}.tbl tbody tr:hover td{background:rgba(255,255,255,.03)}
+.chip{font-size:10.5px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+.cg{background:rgba(34,197,94,.16);color:#4ade80}.cgr{background:rgba(148,163,184,.12);color:#94a3b8}.ca{background:rgba(251,191,36,.16);color:#fbbf24}
+.idc{font-family:monospace;font-size:11.5px;background:rgba(212,175,55,.14);color:#eccf6a;padding:2px 8px;border-radius:6px;font-weight:600}
+.pwc{font-family:monospace;font-size:10.5px;background:rgba(251,191,36,.12);color:#fbbf24;padding:2px 6px;border-radius:5px}
+.btn{padding:6px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;font-size:11.5px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-weight:500;transition:.15s}
+.btn:hover{background:rgba(255,255,255,.1)}
+.btn-pu{background:linear-gradient(135deg,#1f8a52,#d4af37);border:none;color:#fff}
+.btn-gr{background:linear-gradient(135deg,#16a34a,#22c55e);border:none;color:#fff}
+.btn-rd{background:linear-gradient(135deg,#dc2626,#ef4444);border:none;color:#fff}
+.ibtn{width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;cursor:pointer;font-size:13px;transition:.15s}
+.ibtn:hover{background:rgba(212,175,55,.22)}
+.inp{padding:7px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;font-size:12px;width:100%;outline:none}
+.inp:focus{border-color:rgba(212,175,55,.5)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;color:#94a3b8}
+.tog{width:36px;height:19px;border-radius:10px;position:relative;cursor:pointer;border:none;padding:0;transition:.25s;flex-shrink:0}
+.ton{background:linear-gradient(135deg,#1f8a52,#d4af37)}.toff{background:rgba(255,255,255,.15)}
+.tog::after{content:'';position:absolute;top:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.25s}
+.ton::after{left:19px}.toff::after{left:2px}
+.loginwrap{display:flex;align-items:center;justify-content:center;flex:1;padding:20px;min-height:100vh}
+.logincard{padding:28px;width:360px;display:flex;flex-direction:column;gap:14px;border-radius:18px}
+.adots{display:flex;gap:6px;justify-content:center}
+.adot{width:11px;height:11px;border-radius:50%;background:rgba(34,197,94,.4)}.adot.u{background:#ef4444}
+.alertbox{padding:9px 11px;border-radius:9px;font-size:11.5px}
+.aerr{background:rgba(239,68,68,.13);color:#fca5a5}.aok{background:rgba(34,197,94,.13);color:#86efac}.alck{background:rgba(0,0,0,.4);color:#fff;border:1px solid #dc2626}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:400;padding:16px}
+.mo{width:420px;max-height:90vh;overflow-y:auto;border-radius:18px}
+.mohd{padding:14px 17px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:13.5px;color:#fff}
+.mobd{padding:16px;display:flex;flex-direction:column;gap:12px}
+.moft{padding:12px 17px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:flex-end;gap:8px}
+.planc{border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px;cursor:pointer;text-align:center;transition:.15s}
+.planc:hover{background:rgba(255,255,255,.06)}.planc.sel{border-color:#1f8a52;background:rgba(212,175,55,.18)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);padding:11px 18px;border-radius:12px;font-size:12.5px;display:none;z-index:500;min-width:260px;text-align:center}
+.toast-ok{background:rgba(22,163,74,.95);color:#fff}.toast-err{background:rgba(220,38,38,.95);color:#fff}
+.empty{padding:30px;text-align:center;color:#64748b;font-size:12px}
+</style>
+</head>
+<body>
+<div class="stage" id="root">
+
+<!-- ═══ LOGIN ═══ -->
+<div class="screen on" id="scr-login">
+  <div class="loginwrap">
+    <div class="glass logincard">
+      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#1f8a52,#d4af37);display:flex;align-items:center;justify-content:center;font-size:26px">🛡️</div>
+        <div style="font-size:17px;font-weight:700;color:#fff">لوحة تحكم المالك</div>
+        <div style="font-size:11.5px;color:#94a3b8">دخول خاص — مقيّد بـ 5 محاولات</div>
+      </div>
+      <div class="field"><label>المستخدم (admin أو 99999999)</label><input class="inp" id="ol-id" placeholder="admin" maxlength="20"></div>
+      <div class="field"><label>كلمة المرور</label><input type="password" class="inp" id="ol-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')ownerLogin()"></div>
+      <div style="text-align:center">
+        <div style="font-size:10.5px;color:#94a3b8;margin-bottom:6px">المحاولات المتبقية: <span id="att-left" style="font-weight:600;color:#fbbf24">5</span>/5</div>
+        <div class="adots" id="att-dots"></div>
+      </div>
+      <button class="btn btn-pu" style="justify-content:center;padding:11px" id="loginbtn" onclick="ownerLogin()">🔓 دخول المالك</button>
+      <div id="loginmsg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OWNER PANEL ═══ -->
+<div class="screen" id="scr-owner">
+  <div class="topbar">
+    <div class="logo"><div class="lbox">🛡️</div>لوحة تحكم المالك</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span class="pill pg">● متصل</span>
+      <span class="pill pp">Admin</span>
+      <span class="pill pr" id="alert-pill" style="cursor:pointer" onclick="oSw('alerts',document.getElementById('tab-alerts'))">0 إنذار</span>
+      <button class="btn" onclick="logout()" style="padding:4px 11px">🚪 خروج</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" id="tab-dash"   onclick="oSw('dash',this)">📊 لوحة المعلومات</div>
+    <div class="tab"    id="tab-users"  onclick="oSw('users',this)">👥 المشتركون</div>
+    <div class="tab"    id="tab-pricing" onclick="oSw('pricing',this)">💲 الأسعار والاشتراكات</div>
+    <div class="tab"    id="tab-alerts" onclick="oSw('alerts',this)">🚨 الإنذارات</div>
+  </div>
+  <div class="main">
+
+  <div id="p-dash">
+    <div class="g4">
+      <div class="glass sc"><div class="scl">👥 مشتركون</div><div class="scv vp" id="d-users">0</div></div>
+      <div class="glass sc"><div class="scl">🌾 مزارع</div><div class="scv vg" id="d-farms">0</div></div>
+      <div class="glass sc"><div class="scl">🤖 بوت نشط</div><div class="scv vb" id="d-bots">0</div></div>
+      <div class="glass sc"><div class="scl">⚡ مهام مفعّلة</div><div class="scv va" id="d-tasks">0</div></div>
+      <div class="glass sc"><div class="scl">🚨 إنذارات</div><div class="scv vr" id="d-alrts">0</div></div>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">📡 نشاط المشتركين</div></div>
+      <div style="padding:8px" id="live-list"></div>
+    </div>
+  </div>
+
+  <div id="p-users" style="display:none">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input class="inp" style="width:220px" placeholder="🔍 بحث بـ ID..." id="u-search" oninput="renderUsers()">
+      <button class="btn btn-pu" onclick="openAddUser()">➕ مشترك جديد</button>
+      <span style="margin-right:auto;font-size:11px;color:#64748b" id="u-count"></span>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">👥 قواعد بيانات المشتركين — كل حساب معزول</div></div>
+      <div style="overflow-x:auto">
+        <table class="tbl">
+          <thead><tr><th>ID</th><th>كلمة المرور</th><th>المزارع</th><th>الحد</th><th>الاشتراك</th><th>البوت</th><th>التسجيل</th><th>إجراءات</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="p-pricing" style="display:none">
+    <div class="glass">
+      <div class="chd"><div class="cht">💲 التسعير (الباقات)</div><button class="btn btn-gr" onclick="saveSettings()">💾 حفظ</button></div>
+      <div style="padding:14px 14px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:11px" id="tier-fields"></div>
+      <div style="padding:11px 14px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:11px">
+        <div class="field"><label>مدة الاشتراك (أيام)</label><input class="inp" id="set-days" type="number"></div>
+        <div class="field"><label>العملة</label><input class="inp" id="set-currency"></div>
+        <div class="field"><label>بوابات مفعّلة</label><input class="inp" id="set-providers" placeholder="moyasar,paypal,manual"></div>
+      </div>
+      <div style="padding:11px 14px 12px;font-size:12px;color:#eccf6a" id="price-preview"></div>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">🔗 الربط والتسوية</div><button class="btn btn-gr" onclick="saveSettings()">💾 حفظ</button></div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:11px">
+        <div class="field"><label>رابط Webhook (Zapier / Make)</label><input class="inp" id="set-zapier" placeholder="https://hooks.zapier.com/..."></div>
+        <div class="field"><label>ملاحظة التسوية (البنك/الحساب — للعرض فقط)</label><input class="inp" id="set-payout" placeholder="يُضبط فعلياً داخل لوحة Moyasar"></div>
+      </div>
+      <div style="padding:0 14px 14px;font-size:11px;color:#64748b" id="moyasar-state"></div>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">🧾 آخر المدفوعات</div></div>
+      <div style="overflow-x:auto"><table class="tbl">
+        <thead><tr><th>المشترك</th><th>المزارع</th><th>المبلغ</th><th>الحالة</th><th>البوابة</th><th>التاريخ</th></tr></thead>
+        <tbody id="pays-tbody"></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div id="p-alerts" style="display:none">
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-rd" onclick="clearAlerts()">🗑️ مسح الكل</button>
+      <span style="margin-right:auto;font-size:11px;color:#64748b" id="alert-count"></span>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">🚨 سجل الإنذارات الأمنية</div></div>
+      <div id="alerts-list"></div>
+    </div>
+  </div>
+
+  </div>
+</div>
+
+<!-- MODAL: ADD USER -->
+<div class="ov" id="mo-adduser" style="display:none" onclick="if(event.target===this)closeMo()">
+  <div class="glass mo">
+    <div class="mohd">➕ إضافة مشترك جديد<button class="ibtn" onclick="closeMo()">✕</button></div>
+    <div class="mobd">
+      <div class="field"><label>ID اللاعب (8 أرقام)</label><input class="inp" id="m-id" maxlength="8" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div class="field"><label>كلمة المرور</label><div style="display:flex;gap:6px"><input class="inp" id="m-pw"><button class="btn" onclick="document.getElementById('m-pw').value=genPw()">🎲</button></div></div>
+      <div class="field"><label>الباقة — عدد المزارع المسموحة</label>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="m-plans"></div>
+      </div>
+    </div>
+    <div class="moft"><button class="btn" onclick="closeMo()">إلغاء</button><button class="btn btn-gr" onclick="saveUser()">✅ إضافة</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<!-- MODAL: MANUAL ACTIVATE -->
+<div class="ov" id="mo-activate" style="display:none" onclick="if(event.target===this)closeActivate()">
+  <div class="glass mo" style="width:380px">
+    <div class="mohd">✅ تفعيل يدوي — <span id="act-id" class="idc"></span><button class="ibtn" onclick="closeActivate()">✕</button></div>
+    <div class="mobd">
+      <div style="font-size:12px;color:#b9c7bd">اختر الباقة لتفعيل المشترك (تبدأ من اليوم لمدة الاشتراك المحدّدة):</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="act-tiers"></div>
+    </div>
+    <div class="moft"><button class="btn" onclick="closeActivate()">إلغاء</button></div>
+  </div>
+</div>
+
+<script>
+// ═══ OWNER CREDENTIALS ═══
+const OWNER = {id:'99999999', pw:'0500111329'};
+const MAX_GLOBAL = 5;
+
+// ═══ API CLIENT (يتصل بالسيرفر — server.py) ═══
+const API = location.origin + '/api';
+let ownerPw = '';
+let usersCache = {};
+async function apiPost(path, body){
+  try{
+    const r = await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json().catch(()=>({}));
+    return {ok:r.ok, status:r.status, data:d};
+  }catch(e){ return {ok:false, status:0, data:{detail:'تعذّر الاتصال بالسيرفر'}}; }
+}
+function loadUsers(){ return usersCache; }
+async function fetchUsers(){
+  const res = await apiPost('/owner/users',{pw:ownerPw});
+  if(res.ok){ usersCache={}; (res.data.users||[]).forEach(u=>usersCache[u.id]=u); }
+  refreshAll();
+}
+// الإنذارات تبقى محلية في متصفح المالك
+const ALERTS_KEY='wo_alerts';
+function loadAlerts(){ try{const v=localStorage.getItem(ALERTS_KEY);return v?JSON.parse(v):[];}catch(e){return [];} }
+function saveAlerts(a){ try{localStorage.setItem(ALERTS_KEY,JSON.stringify(a));}catch(e){} }
+
+let attempts = 5, locked = false, selectedPlan = 3;
+
+// ═══ LOGIN ═══
+function renderDots(){
+  const used = 5 - attempts;
+  document.getElementById('att-dots').innerHTML =
+    Array.from({length:5},(_,i)=>`<div class="adot${i<used?' u':''}"></div>`).join('');
+  document.getElementById('att-left').textContent = attempts;
+}
+async function ownerLogin(){
+  if(locked) return;
+  const id = document.getElementById('ol-id').value.trim();
+  const pw = document.getElementById('ol-pw').value;
+  const msg = document.getElementById('loginmsg');
+  const res = await apiPost('/owner/login',{id,pw});
+  if(res.ok){
+    ownerPw = pw; attempts=5; renderDots();
+    msg.innerHTML='<div class="alertbox aok">✅ تم الدخول</div>';
+    await fetchUsers();
+    setTimeout(()=>{ goScreen('scr-owner'); }, 300);
+  } else {
+    attempts--; renderDots();
+    addAlert('intrusion','محاولة دخول فاشلة للوحة المالك — ID: '+(id||'فارغ'));
+    if(attempts<=0){
+      locked=true;
+      document.getElementById('loginbtn').disabled=true;
+      msg.innerHTML='<div class="alertbox alck">🔒 تم القفل 30 ثانية</div>';
+      setTimeout(()=>{ locked=false; attempts=5; renderDots(); document.getElementById('loginbtn').disabled=false; msg.innerHTML=''; }, 30000);
+    } else {
+      msg.innerHTML='<div class="alertbox aerr">❌ بيانات خاطئة — متبقٍ '+attempts+'</div>';
+    }
+  }
+}
+function logout(){ ownerPw=''; goScreen('scr-login'); document.getElementById('ol-pw').value=''; }
+
+// ═══ ROUTER ═══
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+function oSw(n,el){
+  ['dash','users','pricing','alerts'].forEach(t=>document.getElementById('p-'+t).style.display=t===n?'':'none');
+  document.querySelectorAll('#scr-owner .tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  if(n==='users') renderUsers();
+  if(n==='alerts') renderAlerts();
+  if(n==='pricing') renderPricing();
+}
+
+// ═══ DASHBOARD ═══
+function refreshAll(){ renderDash(); renderUsers(); renderAlerts(); }
+function countTasks(u){ let n=0; (u.farms||[]).forEach(f=>(f.tasks||[]).forEach(t=>{if(t.enabled)n++;})); return n; }
+function renderDash(){
+  const users = loadUsers();
+  const arr = Object.values(users);
+  let farms=0, bots=0, tasks=0;
+  arr.forEach(u=>{ farms+=(u.farms||[]).length; if(u.botOn)bots++; tasks+=countTasks(u); });
+  document.getElementById('d-users').textContent = arr.length;
+  document.getElementById('d-farms').textContent = farms;
+  document.getElementById('d-bots').textContent = bots;
+  document.getElementById('d-tasks').textContent = tasks;
+  document.getElementById('d-alrts').textContent = loadAlerts().length;
+  const ll = document.getElementById('live-list');
+  if(!arr.length){ ll.innerHTML='<div class="empty">لا يوجد مشتركون بعد</div>'; }
+  else ll.innerHTML = arr.map(u=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span class="idc">${u.id}</span>
+      <span style="font-size:12px;color:#cbd5e1">${(u.farms||[]).length} مزرعة · ${countTasks(u)} مهمة</span>
+      <span class="chip ${u.botOn?'cg':'cgr'}" style="margin-right:auto">${u.botOn?'🤖 يعمل':'متوقف'}</span>
+    </div>`).join('');
+}
+
+// ═══ USERS ═══
+function renderUsers(){
+  const users = loadUsers();
+  const q = (document.getElementById('u-search').value||'').trim();
+  let arr = Object.values(users);
+  if(q) arr = arr.filter(u=>u.id.includes(q));
+  document.getElementById('u-count').textContent = arr.length+' مشترك';
+  const pill = document.getElementById('alert-pill');
+  pill.textContent = loadAlerts().length+' إنذار';
+  const tb = document.getElementById('users-tbody');
+  if(!arr.length){ tb.innerHTML='<tr><td colspan="8"><div class="empty">لا يوجد مشتركون. أضف واحداً أو دعهم يسجّلون من لوحة المشترك.</div></td></tr>'; return; }
+  const SMAP={active:['نشط','cg'],trial:['تجربة','ca'],expired:['منتهٍ','cgr'],none:['—','cgr']};
+  tb.innerHTML = arr.map(u=>{
+    const [slbl,scls]=SMAP[u.subStatus||'none']||SMAP.none;
+    return `
+    <tr>
+      <td><span class="idc">${u.id}</span></td>
+      <td><span class="pwc">${u.pw}</span></td>
+      <td>${(u.farms||[]).length}</td>
+      <td><span class="chip ca">${u.maxFarms}</span></td>
+      <td><span class="chip ${scls}">${slbl}</span><div style="font-size:9px;color:#64748b">${u.subExpiry||''}</div></td>
+      <td><button class="tog ${u.botOn?'ton':'toff'}" onclick="toggleBot('${u.id}')"></button></td>
+      <td style="font-size:11px;color:#94a3b8">${u.createdAt||'—'}</td>
+      <td style="display:flex;gap:5px">
+        <button class="ibtn" title="تفعيل يدوي" onclick="openActivate('${u.id}')" style="color:#4ade80">✅</button>
+        <button class="ibtn" title="إيقاف الاشتراك" onclick="deactivateUser('${u.id}')" style="color:#fbbf24">⛔</button>
+        <button class="ibtn" title="إعادة تعيين كلمة المرور" onclick="resetPw('${u.id}')">🔑</button>
+        <button class="ibtn" title="حذف" onclick="delUser('${u.id}')" style="color:#f87171">🗑️</button>
+      </td>
+    </tr>`; }).join('');
+}
+let activateTarget=null;
+function openActivate(id){
+  activateTarget=id;
+  const tiers=[10,20,30,50,70];
+  document.getElementById('act-id').textContent=id;
+  document.getElementById('act-tiers').innerHTML=tiers.map(n=>`<div class="planc" onclick="doActivate(${n})"><div style="font-size:18px;font-weight:700;color:#fff">${n}</div><div style="font-size:9px;color:#94a3b8">مزرعة</div></div>`).join('');
+  document.getElementById('mo-activate').style.display='flex';
+}
+function closeActivate(){ document.getElementById('mo-activate').style.display='none'; activateTarget=null; }
+async function doActivate(farms){
+  const res=await apiPost('/owner/activate',{pw:ownerPw,id:activateTarget,farms});
+  if(!res.ok){ toast('❌ '+(res.data.detail||'فشل التفعيل'),'err'); return; }
+  toast('✅ فُعّل '+activateTarget+' بـ '+farms+' مزرعة','ok'); closeActivate(); fetchUsers();
+}
+async function deactivateUser(id){
+  if(!confirm('إيقاف اشتراك '+id+'؟'))return;
+  await apiPost('/owner/deactivate',{pw:ownerPw,id}); toast('⛔ أُوقف الاشتراك','ok'); fetchUsers();
+}
+async function toggleBot(id){ const u=usersCache[id]; if(!u)return; u.botOn=!u.botOn; await apiPost('/owner/upsert',{pw:ownerPw,blob:u}); fetchUsers(); }
+async function resetPw(id){ const u=usersCache[id]; if(!u)return; const np=genPw(); u.pw=np; await apiPost('/owner/upsert',{pw:ownerPw,blob:u}); toast('🔑 كلمة المرور الجديدة: '+np,'ok'); fetchUsers(); }
+async function delUser(id){ if(!confirm('حذف المشترك '+id+' نهائياً؟'))return; await apiPost('/owner/delete',{pw:ownerPw,id}); toast('🗑️ تم الحذف','ok'); fetchUsers(); }
+
+// ═══ ADD USER ═══
+function genPw(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return Array.from({length:8},()=>c[Math.floor(Math.random()*c.length)]).join(''); }
+function openAddUser(){
+  document.getElementById('m-id').value=''; document.getElementById('m-pw').value=genPw(); selectedPlan=3;
+  document.getElementById('m-plans').innerHTML=[1,2,3,4,5].map(n=>`<div class="planc${n===3?' sel':''}" onclick="selPlan(${n},this)"><div style="font-size:18px;font-weight:700;color:#fff">${n}</div><div style="font-size:10px;color:#94a3b8">مزرعة</div></div>`).join('');
+  document.getElementById('mo-adduser').style.display='flex';
+}
+function selPlan(n,el){ selectedPlan=n; document.querySelectorAll('#m-plans .planc').forEach(p=>p.classList.remove('sel')); el.classList.add('sel'); }
+function closeMo(){ document.getElementById('mo-adduser').style.display='none'; }
+async function saveUser(){
+  const id=document.getElementById('m-id').value.trim();
+  const pw=document.getElementById('m-pw').value.trim();
+  if(id.length!==8){ toast('❌ ID يجب أن يكون 8 أرقام','err'); return; }
+  if(!pw){ toast('❌ أدخل كلمة المرور','err'); return; }
+  if(usersCache[id]){ toast('❌ هذا الـ ID موجود مسبقاً','err'); return; }
+  const blob={ id, pw, maxFarms:selectedPlan, botOn:false, createdAt:new Date().toISOString().slice(0,10), farms:[] };
+  const res=await apiPost('/owner/upsert',{pw:ownerPw,blob});
+  if(!res.ok){ toast('❌ '+(res.data.detail||'فشل'),'err'); return; }
+  closeMo(); fetchUsers(); toast('✅ تمت إضافة المشترك '+id,'ok');
+}
+
+// ═══ ALERTS ═══
+function addAlert(type,text){ const a=loadAlerts(); a.unshift({type,text,time:new Date().toLocaleString('ar')}); saveAlerts(a.slice(0,100)); }
+function renderAlerts(){
+  const a=loadAlerts();
+  document.getElementById('alert-count').textContent=a.length+' إنذار';
+  document.getElementById('alert-pill').textContent=a.length+' إنذار';
+  const list=document.getElementById('alerts-list');
+  if(!a.length){ list.innerHTML='<div class="empty">لا توجد إنذارات</div>'; return; }
+  list.innerHTML=a.map(x=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="font-size:16px">${x.type==='intrusion'?'🔴':'⚠️'}</span>
+      <div style="flex:1"><div style="font-size:12px;color:#e8e8f0">${x.text}</div><div style="font-size:10px;color:#64748b">${x.time}</div></div>
+    </div>`).join('');
+}
+function clearAlerts(){ saveAlerts([]); renderAlerts(); refreshAll(); }
+
+// ═══ PRICING (لكل مزرعة) / SETTINGS / PAYMENTS ═══
+async function renderPricing(){
+  const s = await apiPost('/owner/settings/get',{pw:ownerPw});
+  const st = s.data.settings||{};
+  const tiers = Object.keys(st).filter(k=>/^price_\d+$/.test(k)).map(k=>parseInt(k.slice(6))).sort((a,b)=>a-b);
+  document.getElementById('tier-fields').innerHTML = tiers.map(n=>`
+    <div class="field"><label>سعر باقة ${n} مزرعة</label><input class="inp tier-inp" data-farms="${n}" type="number" value="${st['price_'+n]??''}"></div>`).join('');
+  document.getElementById('set-days').value = st.period_days ?? 30;
+  document.getElementById('set-currency').value = st.currency||'SAR';
+  document.getElementById('set-providers').value = st.providers||'manual';
+  document.getElementById('set-zapier').value = st.zapier_hook||'';
+  document.getElementById('set-payout').value = st.payout_note||'';
+  updatePricePreview();
+  document.querySelectorAll('.tier-inp').forEach(el=>el.oninput=updatePricePreview);
+  document.getElementById('set-currency').oninput=updatePricePreview;
+  document.getElementById('moyasar-state').textContent = st.moyasar_ready
+    ? '✅ مفتاح Moyasar مضبوط على السيرفر' : '⚠️ مفتاح Moyasar غير مضبوط — أضف MOYASAR_SECRET في متغيرات البيئة لتفعيل الدفع الفعلي.';
+  const pay = await apiPost('/owner/payments',{pw:ownerPw});
+  const list = pay.data.payments||[];
+  document.getElementById('pays-tbody').innerHTML = list.map(x=>`<tr>
+      <td><span class="idc">${x.user_id}</span></td>
+      <td>${x.farms}</td>
+      <td>${x.amount} ${x.currency}</td>
+      <td><span class="chip ${x.status==='paid'?'cg':'ca'}">${x.status}</span></td>
+      <td>${x.provider}</td><td style="font-size:11px;color:#94a3b8">${x.created_at}</td>
+    </tr>`).join('') || '<tr><td colspan="6"><div class="empty">لا مدفوعات</div></td></tr>';
+}
+function updatePricePreview(){
+  const cur=document.getElementById('set-currency').value||'SAR';
+  const rows=[...document.querySelectorAll('.tier-inp')].map(el=>`${el.dataset.farms} مزرعة = ${(parseFloat(el.value)||0).toFixed(0)} ${cur}`);
+  document.getElementById('price-preview').textContent = 'معاينة الباقات: '+rows.join('  ·  ');
+}
+async function saveSettings(){
+  const settings={
+    period_days:document.getElementById('set-days').value,
+    currency:document.getElementById('set-currency').value,
+    providers:document.getElementById('set-providers').value,
+    zapier_hook:document.getElementById('set-zapier').value,
+    payout_note:document.getElementById('set-payout').value,
+  };
+  document.querySelectorAll('.tier-inp').forEach(el=>settings['price_'+el.dataset.farms]=el.value);
+  await apiPost('/owner/settings/save',{pw:ownerPw,settings}); toast('💾 حُفظت الإعدادات','ok'); renderPricing();
+}
+
+// ═══ TOAST ═══
+function toast(msg,type){ const t=document.getElementById('toast'); t.className='toast toast-'+(type||'ok'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',2600); }
+
+renderDots();
+</script>
+</body>
+</html>

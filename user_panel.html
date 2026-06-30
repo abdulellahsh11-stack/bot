@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة المشترك — Whiteout Bot</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;color:#e8e8f0;background:#06150e}
+.stage{min-height:100vh;background:
+  radial-gradient(circle at 15% 20%,rgba(212,175,55,.22),transparent 40%),
+  radial-gradient(circle at 85% 15%,rgba(212,175,55,.18),transparent 40%),
+  radial-gradient(circle at 50% 90%,rgba(212,175,55,.14),transparent 45%),
+  linear-gradient(160deg,#06150e 0%,#0b2c1b 50%,#07180f 100%);
+  display:flex;flex-direction:column;position:relative;overflow:hidden}
+.glass{background:rgba(255,255,255,.07);backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(212,175,55,.22);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.screen{display:none}.screen.on{display:flex;flex-direction:column;flex:1}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;flex-wrap:wrap;gap:8px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;color:#fff}
+.lbox{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#1f8a52,#d4af37);display:flex;align-items:center;justify-content:center;font-size:17px}
+.pill{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
+.pg{background:rgba(34,197,94,.18);color:#4ade80}.pp{background:rgba(212,175,55,.18);color:#eccf6a}.pa{background:rgba(251,191,36,.18);color:#fbbf24}
+.tabs{display:flex;gap:5px;padding:4px 18px;overflow-x:auto}
+.tab{padding:8px 14px;font-size:12px;color:#94a3b8;cursor:pointer;border-radius:11px;white-space:nowrap;flex-shrink:0;transition:.2s;background:rgba(255,255,255,.03);border:1px solid transparent}
+.tab:hover{background:rgba(255,255,255,.07);color:#cbd5e1}
+.tab.on{background:rgba(212,175,55,.22);color:#fff;border-color:rgba(212,175,55,.35)}
+.main{flex:1;padding:14px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.chd{padding:11px 15px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cht{font-weight:600;font-size:13px;color:#fff}
+.sc{padding:13px 15px;border-radius:13px}
+.scl{font-size:10px;color:#94a3b8;margin-bottom:5px}
+.scv{font-size:22px;font-weight:600}
+.vg{color:#4ade80}.vb{color:#3fb37a}.vp{color:#eccf6a}.va{color:#fbbf24}
+.chip{font-size:10.5px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+.cg{background:rgba(34,197,94,.16);color:#4ade80}.cgr{background:rgba(148,163,184,.12);color:#94a3b8}.ca{background:rgba(251,191,36,.16);color:#fbbf24}
+.idc{font-family:monospace;font-size:11.5px;background:rgba(212,175,55,.14);color:#eccf6a;padding:2px 8px;border-radius:6px;font-weight:600}
+.btn{padding:6px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;font-size:11.5px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-weight:500;transition:.15s}
+.btn:hover{background:rgba(255,255,255,.1)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-pu{background:linear-gradient(135deg,#1f8a52,#d4af37);border:none;color:#fff}
+.btn-gr{background:linear-gradient(135deg,#16a34a,#22c55e);border:none;color:#fff}
+.btn-rd{background:linear-gradient(135deg,#dc2626,#ef4444);border:none;color:#fff}
+.ibtn{width:28px;height:28px;border-radius:7px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;cursor:pointer;font-size:13px;transition:.15s}
+.ibtn:hover{background:rgba(212,175,55,.22)}
+.inp{padding:7px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e8e8f0;font-size:12px;width:100%;outline:none}
+.inp:focus{border-color:rgba(212,175,55,.5)}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;color:#94a3b8}
+.tog{width:36px;height:19px;border-radius:10px;position:relative;cursor:pointer;border:none;padding:0;transition:.25s;flex-shrink:0}
+.ton{background:linear-gradient(135deg,#1f8a52,#d4af37)}.toff{background:rgba(255,255,255,.15)}
+.tog::after{content:'';position:absolute;top:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:.25s}
+.ton::after{left:19px}.toff::after{left:2px}
+.loginwrap{display:flex;align-items:center;justify-content:center;flex:1;padding:20px;min-height:100vh}
+.logincard{padding:26px;width:380px;display:flex;flex-direction:column;gap:13px;border-radius:18px}
+.segs{display:flex;background:rgba(255,255,255,.05);border-radius:11px;padding:3px;gap:3px}
+.seg{flex:1;text-align:center;padding:8px;border-radius:9px;font-size:12px;color:#94a3b8;cursor:pointer;transition:.15s}
+.seg.on{background:rgba(212,175,55,.3);color:#fff}
+.alertbox{padding:9px 11px;border-radius:9px;font-size:11.5px}
+.aerr{background:rgba(239,68,68,.13);color:#fca5a5}.aok{background:rgba(34,197,94,.13);color:#86efac}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:400;padding:16px}
+.mo{width:560px;max-width:100%;max-height:90vh;overflow-y:auto;border-radius:18px}
+.mohd{padding:14px 17px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:13.5px;color:#fff}
+.mobd{padding:16px;display:flex;flex-direction:column;gap:12px}
+.moft{padding:12px 17px;border-top:1px solid rgba(255,255,255,.08);display:flex;justify-content:flex-end;gap:8px}
+.planc{border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px;cursor:pointer;text-align:center;transition:.15s}
+.planc:hover{background:rgba(255,255,255,.06)}.planc.sel{border-color:#1f8a52;background:rgba(212,175,55,.18)}
+.fcard{border-radius:13px;padding:13px 15px;display:flex;flex-direction:column;gap:9px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.fctop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fname{font-weight:600;font-size:13.5px;color:#fff;display:flex;align-items:center;gap:7px}
+.fmeta{font-size:11px;color:#94a3b8}
+/* task editor */
+.titem{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);margin-bottom:7px}
+.ticon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;cursor:pointer}
+.tmain{flex:1;min-width:0}
+.tname{font-size:12.5px;font-weight:600;color:#fff}
+.tdesc{font-size:10.5px;color:#94a3b8}
+.tctrl{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.intc{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.2);border-radius:8px;padding:2px}
+.intbtn{width:22px;height:22px;border:none;border-radius:6px;background:rgba(255,255,255,.08);color:#e8e8f0;cursor:pointer;font-size:14px}
+.intbtn:hover{background:rgba(255,255,255,.18)}
+.intval{min-width:20px;text-align:center;font-size:12px;font-weight:600;color:#fff}
+.cstk{font-size:9px;color:#64748b;text-align:center}
+.iconpick{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
+.ipk{width:32px;height:32px;border-radius:7px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.ipk:hover{background:rgba(212,175,55,.2)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);padding:11px 18px;border-radius:12px;font-size:12.5px;display:none;z-index:500;min-width:260px;text-align:center}
+.toast-ok{background:rgba(22,163,74,.95);color:#fff}.toast-err{background:rgba(220,38,38,.95);color:#fff}
+.empty{padding:30px;text-align:center;color:#64748b;font-size:12px}
+</style>
+</head>
+<body>
+<div class="stage" id="root">
+
+<!-- ═══ AUTH (تسجيل / دخول) ═══ -->
+<div class="screen on" id="scr-auth">
+  <div class="loginwrap">
+    <div class="glass logincard">
+      <div style="text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#1f8a52,#d4af37);display:flex;align-items:center;justify-content:center;font-size:26px">❄️</div>
+        <div style="font-size:17px;font-weight:700;color:#fff">لوحة المشترك</div>
+      </div>
+      <div class="segs">
+        <div class="seg on" id="seg-login" onclick="authMode('login')">🔓 دخول</div>
+        <div class="seg" id="seg-reg" onclick="authMode('reg')">📝 تسجيل جديد</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="auth-login">
+        <div class="field" style="margin-bottom:11px"><label>ID اللاعب (8 أرقام)</label><input class="inp" id="li-id" maxlength="8" placeholder="42762074" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+        <div class="field" style="margin-bottom:13px"><label>كلمة المرور</label><input type="password" class="inp" id="li-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <button class="btn btn-pu" style="width:100%;justify-content:center;padding:11px" onclick="doLogin()">🔓 دخول</button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="auth-reg" style="display:none">
+        <div class="field" style="margin-bottom:10px"><label>ID اللاعب (8 أرقام)</label><input class="inp" id="ri-id" maxlength="8" placeholder="مثال: 42762074" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+        <div class="field" style="margin-bottom:10px"><label>أنشئ كلمة مرور</label><input type="password" class="inp" id="ri-pw" placeholder="6 أحرف على الأقل"></div>
+        <div class="field" style="margin-bottom:12px"><label>تأكيد كلمة المرور</label><input type="password" class="inp" id="ri-pw2" placeholder="أعد كتابتها"></div>
+        <div style="font-size:11px;color:#b9c7bd;margin-bottom:12px;background:rgba(212,175,55,.08);padding:9px;border-radius:9px">🎁 تبدأ تلقائياً بتجربة مجانية يومين بمزرعتين. بعدها اختر باقتك (10/20/30/50/70 مزرعة) من تبويب «حسابي» للاستمرار.</div>
+        <button class="btn btn-gr" style="width:100%;justify-content:center;padding:11px" onclick="doRegister()">✅ إنشاء الحساب</button>
+      </div>
+
+      <div id="auth-msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUBSCRIBER PANEL ═══ -->
+<div class="screen" id="scr-app">
+  <div class="topbar">
+    <div class="logo"><div class="lbox">❄️</div>بوت المشترك</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span class="pill pg" id="bot-pill">● نشط</span>
+      <span class="pill pp" id="id-badge">—</span>
+      <button class="btn" onclick="doLogout()" style="padding:4px 11px">🚪 خروج</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" id="tab-bot"   onclick="aSw('bot',this)">🤖 شاشة البوت</div>
+    <div class="tab"    id="tab-farms" onclick="aSw('farms',this)">🌾 مزارعي</div>
+    <div class="tab"    id="tab-acc"   onclick="aSw('acc',this)">👤 حسابي</div>
+  </div>
+  <div class="main">
+
+  <!-- BOT -->
+  <div id="ap-bot">
+    <div class="glass" style="padding:14px 16px;display:flex;align-items:center;gap:13px">
+      <div style="width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#1f8a52,#d4af37);display:flex;align-items:center;justify-content:center;font-size:20px">🤖</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px">حالة البوت <span class="chip cg" id="bot-state">يعمل</span></div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:3px" id="bot-sub">—</div>
+      </div>
+      <button class="btn btn-pu" id="bot-toggle-btn" onclick="toggleMyBot()">إيقاف البوت</button>
+    </div>
+    <div class="g4">
+      <div class="glass sc"><div class="scl">🌾 مزارعي</div><div class="scv vg" id="s-farms">0</div></div>
+      <div class="glass sc"><div class="scl">✅ نشطة</div><div class="scv vb" id="s-active">0</div></div>
+      <div class="glass sc"><div class="scl">⚡ مهام مفعّلة</div><div class="scv vp" id="s-tasks">0</div></div>
+      <div class="glass sc"><div class="scl">📦 الحد</div><div class="scv va" id="s-max">0</div></div>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">🌾 ملخّص المزارع</div></div>
+      <div style="padding:8px" id="bot-farm-list"></div>
+    </div>
+  </div>
+
+  <!-- FARMS -->
+  <div id="ap-farms" style="display:none">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-pu" id="addfarm-btn" onclick="openAddFarm()">➕ إضافة مزرعة</button>
+      <span style="font-size:11px;color:#64748b" id="farm-cap"></span>
+    </div>
+    <div id="farms-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:11px"></div>
+  </div>
+
+  <!-- ACCOUNT -->
+  <div id="ap-acc" style="display:none">
+    <div class="glass">
+      <div class="chd"><div class="cht">💳 الاشتراك</div><span class="chip" id="sub-badge">—</span></div>
+      <div style="padding:14px;display:flex;flex-direction:column;gap:11px">
+        <div id="sub-info" style="font-size:12.5px;color:#cbd5e1"></div>
+        <div id="plans-box" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px"></div>
+      </div>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">👤 بياناتي</div></div>
+      <div style="padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:11px">
+        <div class="field"><label>ID اللاعب</label><input class="inp" id="ac-id" readonly></div>
+        <div class="field"><label>عدد المزارع المسموحة</label><input class="inp" id="ac-max" readonly></div>
+        <div class="field"><label>تاريخ التسجيل</label><input class="inp" id="ac-date" readonly></div>
+        <div class="field"><label>المزارع المستخدمة</label><input class="inp" id="ac-used" readonly></div>
+      </div>
+    </div>
+    <div class="glass">
+      <div class="chd"><div class="cht">🔑 تغيير كلمة المرور</div></div>
+      <div style="padding:14px;display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap">
+        <div class="field" style="flex:1;min-width:160px"><label>كلمة المرور الجديدة</label><input type="password" class="inp" id="ac-newpw"></div>
+        <button class="btn btn-gr" onclick="changePw()">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>
+
+<!-- MODAL: ADD FARM -->
+<div class="ov" id="mo-farm" style="display:none" onclick="if(event.target===this)closeFarmMo()">
+  <div class="glass mo" style="width:420px">
+    <div class="mohd">➕ إضافة مزرعة<button class="ibtn" onclick="closeFarmMo()">✕</button></div>
+    <div class="mobd">
+      <div class="field"><label>اسم المزرعة</label><input class="inp" id="f-name" placeholder="مثال: مزرعة الموارد 1"></div>
+      <div class="field"><label>📧 إيميل حساب اللعبة (Google)</label><input class="inp" id="f-email" placeholder="email@gmail.com"></div>
+      <div class="field"><label>🔒 كلمة سر الحساب</label><input type="password" class="inp" id="f-pw" placeholder="••••••••"></div>
+      <div style="font-size:10.5px;color:#64748b;background:rgba(255,255,255,.04);padding:8px;border-radius:8px">تُحفظ بيانات الحساب محلياً ليستخدمها البوت في الدخول. كل مزرعة تبدأ بقائمة مهام افتراضية يمكنك تخصيصها.</div>
+    </div>
+    <div class="moft"><button class="btn" onclick="closeFarmMo()">إلغاء</button><button class="btn btn-gr" onclick="saveFarm()">✅ إضافة</button></div>
+  </div>
+</div>
+
+<!-- MODAL: TASK CUSTOMIZER -->
+<div class="ov" id="mo-tasks" style="display:none" onclick="if(event.target===this)closeTasksMo()">
+  <div class="glass mo">
+    <div class="mohd"><span id="tasks-title">⚡ تخصيص المهام</span><button class="ibtn" onclick="closeTasksMo()">✕</button></div>
+    <div class="mobd">
+      <div id="cfg-cards"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span style="font-size:12px;color:#cbd5e1;font-weight:600">📋 بقية المهام</span>
+        <button class="btn btn-pu" onclick="addTaskToFarm()">➕ مهمة جديدة</button>
+      </div>
+      <span style="font-size:11px;color:#94a3b8" id="tasks-count"></span>
+      <div id="tasks-list"></div>
+    </div>
+    <div class="moft"><button class="btn" onclick="closeTasksMo()">إغلاق</button><button class="btn btn-gr" onclick="saveTasks()">💾 حفظ المهام</button></div>
+  </div>
+</div>
+
+<!-- MODAL: ICON PICKER -->
+<div class="ov" id="mo-icon" style="display:none" onclick="if(event.target===this)closeIconMo()">
+  <div class="glass mo" style="width:340px">
+    <div class="mohd">اختر أيقونة<button class="ibtn" onclick="closeIconMo()">✕</button></div>
+    <div class="mobd"><div class="iconpick" id="icon-grid"></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ═══ API CLIENT (يتصل بالسيرفر — server.py) ═══
+const API = location.origin + '/api';
+let myUser = null;   // نسخة المشترك الحالي في الذاكرة
+async function apiPost(path, body){
+  try{
+    const r = await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d = await r.json().catch(()=>({}));
+    return {ok:r.ok, status:r.status, data:d};
+  }catch(e){ return {ok:false, status:0, data:{detail:'تعذّر الاتصال بالسيرفر'}}; }
+}
+async function saveMe(){ if(!myUser)return; await apiPost('/save',{id:myUser.id, pw:myUser.pw, blob:myUser}); }
+
+// ═══ مهام افتراضية لكل مزرعة جديدة ═══
+const ICONS = ['🎁','⛏️','🏗️','⚔️','🏥','🗺️','🔦','🏛️','🤝','📨','🛡️','🔥','🍳','🪚','🪨','💎','⚡','🐾','🚀','🎯','🏆','📦','🔔','⭐'];
+function defaultTasks(){
+  const base=[
+    {name:'مكافآت يومية', desc:'يجمع مكافآت اليوم',   icon:'🎁', color:'#dcfce7', interval:1440, dur:2, priority:1, enabled:true},
+    {name:'تدريب جنود',   desc:'مشاة رماح رماة',       icon:'⚔️', color:'#ede9fe', interval:60,   dur:3, priority:2, enabled:true},
+    {name:'علاج الجنود',  desc:'يعالج المستشفى',       icon:'🏥', color:'#fee2e2', interval:15,   dur:3, priority:1, enabled:true},
+    {name:'استكشاف',      desc:'يرفع الأبطال',         icon:'🗺️', color:'#e0f2fe', interval:120,  dur:3, priority:3, enabled:true},
+    {name:'المنارة',      desc:'قتل الوحوش',           icon:'🔦', color:'#fef3c7', interval:240,  dur:4, priority:4, enabled:false},
+    {name:'بيت الحاكم',   desc:'التعبئة العاجلة',      icon:'🏛️', color:'#f1f5f9', interval:480,  dur:2, priority:4, enabled:true},
+  ];
+  return base.map((t,i)=>({id:Date.now()+i, ...t}));
+}
+
+let me_id = null;          // ID المشترك الحالي
+
+let editingFarmId = null;  // المزرعة قيد تحرير المهام
+let workingTasks = [];     // نسخة عمل من مهام المزرعة
+let workingGather = null;  // نسخة عمل من إعداد جمع الموارد
+let workingDevelop = null; // نسخة عمل من إعداد التطوير
+let workingSession = 480;  // مدة العودة للمزرعة (دقائق)
+let iconTargetTaskId = null;
+
+// موارد جمع الموارد (مثل شاشة اللعبة)
+const RES_LIST = [
+  {k:'meat', name:'لحم',  icon:'🥩'},
+  {k:'wood', name:'خشب',  icon:'🪵'},
+  {k:'coal', name:'فحم',  icon:'⚫'},
+  {k:'iron', name:'حديد', icon:'⛏️'},
+];
+function defGather(){ return {meat:true, wood:true, coal:true, iron:true, level:1, interval:60}; }
+function defDevelop(){ return {enabled:true, interval:120}; }
+function normFarm(f){
+  if(!f.gather)  f.gather  = defGather();
+  if(!f.develop) f.develop = defDevelop();
+  if(!f.sessionEvery) f.sessionEvery = 480;  // العودة للمزرعة كل 8 ساعات
+  if(!f.tasks)   f.tasks   = [];
+  return f;
+}
+
+function me(){ return myUser; }
+function persistMe(user){ myUser=user; saveMe(); }
+
+// ═══ AUTH ═══
+function authMode(m){
+  document.getElementById('seg-login').classList.toggle('on',m==='login');
+  document.getElementById('seg-reg').classList.toggle('on',m==='reg');
+  document.getElementById('auth-login').style.display=m==='login'?'':'none';
+  document.getElementById('auth-reg').style.display=m==='reg'?'':'none';
+  document.getElementById('auth-msg').innerHTML='';
+}
+function authMsg(html){ document.getElementById('auth-msg').innerHTML=html; }
+
+async function doRegister(){
+  const id=document.getElementById('ri-id').value.trim();
+  const pw=document.getElementById('ri-pw').value;
+  const pw2=document.getElementById('ri-pw2').value;
+  if(id.length!==8){ authMsg('<div class="alertbox aerr">❌ ID يجب أن يكون 8 أرقام</div>'); return; }
+  if(pw.length<6){ authMsg('<div class="alertbox aerr">❌ كلمة المرور 6 أحرف على الأقل</div>'); return; }
+  if(pw!==pw2){ authMsg('<div class="alertbox aerr">❌ كلمتا المرور غير متطابقتين</div>'); return; }
+  const res=await apiPost('/register',{id,pw,maxFarms:1});
+  if(!res.ok){ authMsg('<div class="alertbox aerr">❌ '+(res.data.detail||'فشل التسجيل')+'</div>'); return; }
+  myUser=res.data; me_id=id;
+  authMsg('<div class="alertbox aok">✅ تم إنشاء الحساب — جارٍ الدخول...</div>');
+  setTimeout(()=>enterApp(), 400);
+}
+async function doLogin(){
+  const id=document.getElementById('li-id').value.trim();
+  const pw=document.getElementById('li-pw').value;
+  const res=await apiPost('/login',{id,pw});
+  if(!res.ok){ authMsg('<div class="alertbox aerr">❌ '+(res.data.detail||'فشل الدخول')+'</div>'); return; }
+  myUser=res.data; me_id=id; enterApp();
+}
+function doLogout(){ me_id=null; goScreen('scr-auth'); document.getElementById('li-pw').value=''; }
+
+function enterApp(){
+  goScreen('scr-app');
+  document.getElementById('id-badge').textContent=me_id;
+  refreshApp();
+}
+
+// ═══ ROUTER ═══
+function goScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on')); document.getElementById(id).classList.add('on'); }
+function aSw(n,el){
+  ['bot','farms','acc'].forEach(t=>document.getElementById('ap-'+t).style.display=t===n?'':'none');
+  document.querySelectorAll('#scr-app .tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  if(n==='farms') renderFarms();
+  if(n==='acc') renderAccount();
+  if(n==='bot') renderBot();
+}
+
+// ═══ BOT SCREEN ═══
+function refreshApp(){ renderBot(); renderFarms(); }
+function enabledTaskCount(u){ let n=0; (u.farms||[]).forEach(f=>(f.tasks||[]).forEach(t=>{if(t.enabled)n++;})); return n; }
+function renderBot(){
+  const u=me(); if(!u)return;
+  const farms=u.farms||[];
+  const active=farms.filter(f=>f.on).length;
+  document.getElementById('s-farms').textContent=farms.length;
+  document.getElementById('s-active').textContent=active;
+  document.getElementById('s-tasks').textContent=enabledTaskCount(u);
+  document.getElementById('s-max').textContent=u.maxFarms;
+  const on=u.botOn;
+  document.getElementById('bot-state').textContent=on?'يعمل':'متوقف';
+  document.getElementById('bot-state').className='chip '+(on?'cg':'cgr');
+  document.getElementById('bot-pill').textContent=on?'● نشط':'● متوقف';
+  document.getElementById('bot-toggle-btn').textContent=on?'إيقاف البوت':'تشغيل البوت';
+  document.getElementById('bot-sub').textContent=`${active}/${farms.length} مزرعة نشطة · ${enabledTaskCount(u)} مهمة مجدولة`;
+  const list=document.getElementById('bot-farm-list');
+  if(!farms.length){ list.innerHTML='<div class="empty">لا توجد مزارع. أضف مزرعة من تبويب «مزارعي».</div>'; return; }
+  list.innerHTML=farms.map(f=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="font-size:13px;color:#fff;font-weight:600">${esc(f.name)}</span>
+      <span class="fmeta">${(f.tasks||[]).filter(t=>t.enabled).length} مهمة مفعّلة</span>
+      <span class="chip ${f.on?'cg':'cgr'}" style="margin-right:auto">${f.on?'نشطة':'متوقفة'}</span>
+    </div>`).join('');
+}
+function toggleMyBot(){ const u=me(); u.botOn=!u.botOn; persistMe(u); renderBot(); }
+
+// ═══ FARMS ═══
+function renderFarms(){
+  const u=me(); if(!u)return;
+  const farms=u.farms||[];
+  document.getElementById('farm-cap').textContent=`${farms.length}/${u.maxFarms} مزرعة مستخدمة`;
+  document.getElementById('addfarm-btn').disabled = farms.length>=u.maxFarms;
+  const grid=document.getElementById('farms-grid');
+  if(!farms.length){ grid.innerHTML='<div class="empty">لا توجد مزارع بعد. اضغط «إضافة مزرعة».</div>'; return; }
+  grid.innerHTML=farms.map(f=>{ normFarm(f); const res=RES_LIST.filter(r=>f.gather[r.k]).map(r=>r.icon).join('')||'—'; return `
+    <div class="fcard">
+      <div class="fctop">
+        <div class="fname">🌾 ${esc(f.name)}</div>
+        <button class="tog ${f.on?'ton':'toff'}" onclick="toggleFarm(${f.id})"></button>
+      </div>
+      <div class="fmeta">📧 ${esc(f.email||'—')}</div>
+      <div class="fmeta">🏗️ التطوير: ${f.develop.enabled?'مفعّل':'متوقف'} · 🗺️ موارد: ${res}</div>
+      <div class="fmeta">⚡ ${(f.tasks||[]).filter(t=>t.enabled).length}/${(f.tasks||[]).length} مهمة إضافية</div>
+      <div style="display:flex;gap:6px;margin-top:3px">
+        <button class="btn btn-pu" style="flex:1;justify-content:center" onclick="openTasks(${f.id})">⚙️ تخصيص</button>
+        <button class="ibtn" title="حذف المزرعة" onclick="delFarm(${f.id})" style="color:#f87171">🗑️</button>
+      </div>
+    </div>`; }).join('');
+}
+function openAddFarm(){
+  const u=me(); if((u.farms||[]).length>=u.maxFarms){ toast('❌ بلغت الحد المسموح ('+u.maxFarms+')','err'); return; }
+  document.getElementById('f-name').value=''; document.getElementById('f-email').value=''; document.getElementById('f-pw').value='';
+  document.getElementById('mo-farm').style.display='flex';
+}
+function closeFarmMo(){ document.getElementById('mo-farm').style.display='none'; }
+function saveFarm(){
+  const u=me();
+  const name=document.getElementById('f-name').value.trim();
+  const email=document.getElementById('f-email').value.trim();
+  const pw=document.getElementById('f-pw').value;
+  if(!name){ toast('❌ أدخل اسم المزرعة','err'); return; }
+  if(!email){ toast('❌ أدخل إيميل الحساب','err'); return; }
+  u.farms=u.farms||[];
+  if(u.farms.length>=u.maxFarms){ toast('❌ بلغت الحد المسموح','err'); return; }
+  u.farms.push({ id:Date.now(), name, email, gamePw:pw, on:true, develop:defDevelop(), gather:defGather(), tasks:defaultTasks() });
+  persistMe(u); closeFarmMo(); renderFarms(); renderBot(); toast('✅ تمت إضافة المزرعة','ok');
+}
+function toggleFarm(fid){ const u=me(); const f=u.farms.find(x=>x.id===fid); if(f){ f.on=!f.on; persistMe(u); renderFarms(); renderBot(); } }
+function delFarm(fid){ if(!confirm('حذف هذه المزرعة ومهامها؟'))return; const u=me(); u.farms=u.farms.filter(x=>x.id!==fid); persistMe(u); renderFarms(); renderBot(); toast('🗑️ تم الحذف','ok'); }
+
+// ═══ TASK CUSTOMIZER (لكل مزرعة) ═══
+function openTasks(fid){
+  const u=me(); const f=u.farms.find(x=>x.id===fid); if(!f)return;
+  normFarm(f);
+  editingFarmId=fid;
+  workingTasks=JSON.parse(JSON.stringify(f.tasks||[]));
+  workingGather=JSON.parse(JSON.stringify(f.gather));
+  workingDevelop=JSON.parse(JSON.stringify(f.develop));
+  workingSession=f.sessionEvery||480;
+  document.getElementById('tasks-title').textContent='⚙️ '+f.name;
+  renderCfg();
+  renderTasksList();
+  document.getElementById('mo-tasks').style.display='flex';
+}
+function closeTasksMo(){ document.getElementById('mo-tasks').style.display='none'; editingFarmId=null; }
+function fmtInterval(m){ if(m>=1440)return Math.floor(m/1440)+' يوم'; if(m>=60)return Math.floor(m/60)+' ساعة'; return m+' دقيقة'; }
+
+// ── بطاقتا التطوير + جمع الموارد ──
+function renderCfg(){
+  const dev=workingDevelop, g=workingGather;
+  const resCells=RES_LIST.map(r=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(0,0,0,.18)">
+      <span style="font-size:17px">${r.icon}</span>
+      <span style="font-size:12.5px;color:#fff;flex:1">${r.name}</span>
+      <button class="tog ${g[r.k]?'ton':'toff'}" onclick="togRes('${r.k}')"></button>
+    </div>`).join('');
+  document.getElementById('cfg-cards').innerHTML=`
+    <div class="fcard" style="margin-bottom:9px">
+      <div class="fname" style="margin-bottom:4px">⏱️ الجدولة</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="cstk">العودة لهذه المزرعة كل</span>
+        <div class="intc"><button class="intbtn" onclick="adjSession(-1)">−</button><span class="intval" style="min-width:54px">${fmtSched(workingSession)}</span><button class="intbtn" onclick="adjSession(1)">+</button></div>
+      </div>
+      <div class="fmeta">يشغّلها ~5 دقائق ثم ينتقل لمزرعة أخرى، ويعود إليها بعد هذه المدة</div>
+    </div>
+    <div class="fcard" style="margin-bottom:9px">
+      <div class="fctop">
+        <div class="fname">🏗️ التطوير — بناء وترقية المباني</div>
+        <button class="tog ${dev.enabled?'ton':'toff'}" onclick="togDev()"></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="cstk">يكرّر كل</span>
+        <div class="intc"><button class="intbtn" onclick="adjDevInt(-1)">−</button><span class="intval" style="min-width:50px">${fmtInterval(dev.interval)}</span><button class="intbtn" onclick="adjDevInt(1)">+</button></div>
+      </div>
+      <div class="fmeta">الترتيب: حجرة الاحتراق ← مباني الإنتاج ← المأوى ← المباني العسكرية</div>
+    </div>
+    <div class="fcard" style="margin-bottom:9px">
+      <div class="fname" style="margin-bottom:4px">🗺️ إرسال لجمع الموارد</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">${resCells}</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:7px">
+        <span class="cstk">مستوى المورد</span>
+        <div class="intc"><button class="intbtn" onclick="adjGatherLvl(-1)">−</button><span class="intval">${g.level}</span><button class="intbtn" onclick="adjGatherLvl(1)">+</button></div>
+        <span class="cstk" style="margin-right:12px">يكرّر كل</span>
+        <div class="intc"><button class="intbtn" onclick="adjGatherInt(-1)">−</button><span class="intval" style="min-width:50px">${fmtInterval(g.interval)}</span><button class="intbtn" onclick="adjGatherInt(1)">+</button></div>
+      </div>
+    </div>`;
+}
+function togDev(){ workingDevelop.enabled=!workingDevelop.enabled; renderCfg(); }
+function adjDevInt(d){ let i=INTERVALS.indexOf(workingDevelop.interval); if(i<0)i=3; i=Math.min(INTERVALS.length-1,Math.max(0,i+d)); workingDevelop.interval=INTERVALS[i]; renderCfg(); }
+function togRes(k){ workingGather[k]=!workingGather[k]; renderCfg(); }
+function adjGatherLvl(d){ workingGather.level=Math.min(6,Math.max(1,workingGather.level+d)); renderCfg(); }
+function adjGatherInt(d){ let i=INTERVALS.indexOf(workingGather.interval); if(i<0)i=2; i=Math.min(INTERVALS.length-1,Math.max(0,i+d)); workingGather.interval=INTERVALS[i]; renderCfg(); }
+const SESSION_OPTS=[30,60,120,240,360,480,720,1440];
+function fmtSched(m){ return m>=60 ? (m/60)+' ساعة' : m+' دقيقة'; }
+function adjSession(d){ let i=SESSION_OPTS.indexOf(workingSession); if(i<0)i=5; i=Math.min(SESSION_OPTS.length-1,Math.max(0,i+d)); workingSession=SESSION_OPTS[i]; renderCfg(); }
+function renderTasksList(){
+  document.getElementById('tasks-count').textContent=workingTasks.length+' مهمة';
+  document.getElementById('tasks-list').innerHTML=workingTasks.map((t,i)=>`
+    <div class="titem">
+      <div class="ticon" style="background:${t.color}" onclick="openIcon(${t.id})" title="غيّر الأيقونة">${t.icon}</div>
+      <div class="tmain">
+        <input class="inp" style="border:none;background:transparent;padding:0;font-weight:600;font-size:12.5px" value="${esc(t.name)}" oninput="setTask(${t.id},'name',this.value)">
+        <input class="inp" style="border:none;background:transparent;padding:0;font-size:10.5px;color:#94a3b8" value="${esc(t.desc)}" oninput="setTask(${t.id},'desc',this.value)">
+      </div>
+      <div class="tctrl">
+        <div style="text-align:center">
+          <div class="cstk">كل</div>
+          <div class="intc"><button class="intbtn" onclick="adjInterval(${t.id},-1)">−</button><span class="intval" style="min-width:46px">${fmtInterval(t.interval)}</span><button class="intbtn" onclick="adjInterval(${t.id},1)">+</button></div>
+        </div>
+        <div style="text-align:center">
+          <div class="cstk">مدة (د)</div>
+          <div class="intc"><button class="intbtn" onclick="adjDur(${t.id},-1)">−</button><span class="intval">${t.dur}</span><button class="intbtn" onclick="adjDur(${t.id},1)">+</button></div>
+        </div>
+        <div style="text-align:center"><div class="cstk">تشغيل</div><button class="tog ${t.enabled?'ton':'toff'}" onclick="togTask(${t.id})"></button></div>
+        <button class="ibtn" style="color:#f87171" onclick="delTask(${t.id})" title="حذف">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+const INTERVALS=[15,30,60,120,240,480,720,1440];
+function adjInterval(id,d){ const t=workingTasks.find(x=>x.id===id); if(!t)return; let i=INTERVALS.indexOf(t.interval); if(i<0)i=2; i=Math.min(INTERVALS.length-1,Math.max(0,i+d)); t.interval=INTERVALS[i]; renderTasksList(); }
+function adjDur(id,d){ const t=workingTasks.find(x=>x.id===id); if(!t)return; t.dur=Math.min(10,Math.max(1,t.dur+d)); renderTasksList(); }
+function togTask(id){ const t=workingTasks.find(x=>x.id===id); if(t){ t.enabled=!t.enabled; renderTasksList(); } }
+function setTask(id,k,v){ const t=workingTasks.find(x=>x.id===id); if(t) t[k]=v; }
+function delTask(id){ workingTasks=workingTasks.filter(x=>x.id!==id); renderTasksList(); }
+function addTaskToFarm(){ workingTasks.push({id:Date.now(),name:'مهمة جديدة',desc:'وصف...',icon:'⭐',color:'#fef9c3',interval:60,dur:2,priority:3,enabled:true}); renderTasksList(); }
+function saveTasks(){
+  const u=me(); const f=u.farms.find(x=>x.id===editingFarmId); if(!f)return;
+  f.tasks=workingTasks; f.gather=workingGather; f.develop=workingDevelop; f.sessionEvery=workingSession;
+  persistMe(u); closeTasksMo(); renderFarms(); renderBot(); toast('💾 تم الحفظ','ok');
+}
+// icon picker
+function openIcon(tid){ iconTargetTaskId=tid; document.getElementById('icon-grid').innerHTML=ICONS.map(ic=>`<div class="ipk" onclick="pickIcon('${ic}')">${ic}</div>`).join(''); document.getElementById('mo-icon').style.display='flex'; }
+function closeIconMo(){ document.getElementById('mo-icon').style.display='none'; }
+function pickIcon(ic){ const t=workingTasks.find(x=>x.id===iconTargetTaskId); if(t)t.icon=ic; closeIconMo(); renderTasksList(); }
+
+// ═══ ACCOUNT ═══
+function renderAccount(){
+  const u=me(); if(!u)return;
+  document.getElementById('ac-id').value=u.id;
+  document.getElementById('ac-max').value=u.maxFarms+' مزرعة';
+  document.getElementById('ac-date').value=u.createdAt||'—';
+  document.getElementById('ac-used').value=(u.farms||[]).length+' مزرعة';
+  document.getElementById('ac-newpw').value='';
+  renderSubscription();
+}
+let pricing=null;
+async function renderSubscription(){
+  const u=me(); if(!u)return;
+  const st=u.subStatus||'none';
+  const badge=document.getElementById('sub-badge');
+  const map={active:['نشط','cg'], trial:['تجربة','ca'], expired:['منتهٍ','ca'], none:['غير مشترك','cgr']};
+  const [lbl,cls]=map[st]||map.none;
+  badge.textContent=lbl; badge.className='chip '+cls;
+  let info;
+  if(st==='active') info=`اشتراكك: <b style="color:#fff">${esc(u.planName||u.maxFarms+' مزرعة')}</b> · ينتهي في <b style="color:#fff">${esc(u.subExpiry||'—')}</b>`;
+  else if(st==='trial') info=`🎁 تجربتك المجانية (${u.maxFarms} مزرعة) تنتهي في <b style="color:#fff">${esc(u.subExpiry||'—')}</b> — اشترك للاستمرار بعدها:`;
+  else if(st==='expired') info='انتهت تجربتك — اختر باقة لتفعيل حسابك:';
+  else info='اختر باقتك واشترك لتفعيل البوت:';
+  document.getElementById('sub-info').innerHTML=info;
+  await loadPricing();
+}
+async function loadPricing(){
+  try{ const r=await fetch(API+'/pricing'); pricing=await r.json(); }
+  catch(e){ document.getElementById('plans-box').innerHTML='<div class="empty">تعذّر جلب الأسعار</div>'; return; }
+  renderPricingBox();
+}
+function renderPricingBox(){
+  const p=pricing; if(!p)return;
+  const box=document.getElementById('plans-box');
+  box.style.gridTemplateColumns='repeat(auto-fill,minmax(160px,1fr))';
+  box.innerHTML=(p.tiers||[]).map(t=>`
+    <div class="planc" style="text-align:right;padding:14px">
+      <div style="font-weight:700;color:#fff;font-size:14px">${t.farms} مزرعة</div>
+      <div style="font-size:24px;font-weight:800;color:#eccf6a;margin:6px 0">${t.price.toFixed(0)} <span style="font-size:11px;color:#94a3b8">${esc(p.currency)}</span></div>
+      <div class="fmeta">كل ${p.period_days} يوم</div>
+      <button class="btn btn-gr" style="width:100%;justify-content:center;margin-top:8px" onclick="paySub(${t.farms})">اشترك / ادفع</button>
+    </div>`).join('') || '<div class="empty">لا توجد باقات متاحة</div>';
+}
+async function paySub(farms){
+  const u=me();
+  const res=await apiPost('/pay/create',{userId:u.id, pw:u.pw, farms, provider:'manual'});
+  if(!res.ok){ toast('❌ '+(res.data.detail||'تعذّر إنشاء الدفع'),'err'); return; }
+  if(res.data.payUrl){ window.open(res.data.payUrl,'_blank'); toast('↗️ أكمل الدفع في الصفحة المفتوحة ثم عُد','ok'); }
+}
+function changePw(){
+  const np=document.getElementById('ac-newpw').value;
+  if(np.length<6){ toast('❌ 6 أحرف على الأقل','err'); return; }
+  const u=me(); u.pw=np; persistMe(u); toast('✅ تم تغيير كلمة المرور','ok'); document.getElementById('ac-newpw').value='';
+}
+
+// ═══ UTIL ═══
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function toast(msg,type){ const t=document.getElementById('toast'); t.className='toast toast-'+(type||'ok'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',2600); }
+
+
+</script>
+</body>
+</html>
