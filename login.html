@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تسجيل الدخول — بوت</title>
+<style>
+  :root{--bg:#04241c;--card:rgba(255,255,255,.06);--gold:#d9b45b;--green:#2fbf71;--line:rgba(217,180,91,.35)}
+  *{box-sizing:border-box;font-family:system-ui,"Segoe UI",Tahoma,sans-serif}
+  body{margin:0;min-height:100vh;display:grid;place-items:center;color:#f3efe3;
+       background:radial-gradient(1200px 600px at 50% -10%,#0a3b2c,#04241c 60%)}
+  .card{width:min(92vw,380px);background:var(--card);border:1px solid var(--line);border-radius:18px;
+        padding:28px;backdrop-filter:blur(8px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  h1{margin:0 0 4px;font-size:22px;color:var(--gold);text-align:center}
+  p.sub{margin:0 0 20px;text-align:center;color:#b8cabf;font-size:13px}
+  label{display:block;font-size:13px;margin:14px 0 6px;color:#cfe3d8}
+  input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);
+        background:rgba(0,0,0,.25);color:#fff;font-size:15px}
+  input:focus{outline:none;border-color:var(--gold)}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;color:#b8cabf}
+  a{color:var(--gold);text-decoration:none}
+  button{margin-top:18px;width:100%;padding:12px;border:0;border-radius:12px;font-size:16px;font-weight:700;
+         cursor:pointer;color:#04241c;background:linear-gradient(90deg,var(--green),var(--gold))}
+  .msg{margin-top:14px;font-size:13px;text-align:center;min-height:18px}
+  .err{color:#ff9b9b}.ok{color:var(--green)}
+  .lang{position:fixed;top:14px;inset-inline-end:14px;font-size:12px;cursor:pointer;color:var(--gold)}
+</style>
+</head>
+<body>
+  <div class="lang" onclick="toggleLang()">EN / ع</div>
+  <form class="card" onsubmit="return login(event)">
+    <h1 data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</h1>
+    <p class="sub" data-ar="بوّابة إدارة البوت" data-en="Bot control gateway">بوّابة إدارة البوت</p>
+    <label data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label data-ar="كلمة المرور" data-en="Password">كلمة المرور</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <div class="row">
+      <label style="display:flex;gap:6px;align-items:center;margin:0">
+        <input id="remember" type="checkbox" style="width:auto"> <span data-ar="تذكّرني" data-en="Remember me">تذكّرني</span>
+      </label>
+      <a href="#" data-ar="نسيت كلمة المرور؟" data-en="Forgot password?">نسيت كلمة المرور؟</a>
+    </div>
+    <button data-ar="دخول" data-en="Login">دخول</button>
+    <div id="msg" class="msg"></div>
+  </form>
+<script>
+  // عدّل هذا ليطابق رابط السيرفر (مثلاً https://bot-afcw.onrender.com)
+  const API = location.origin;
+  async function login(e){
+    e.preventDefault();
+    const msg = document.getElementById('msg'); msg.className='msg'; msg.textContent='...';
+    try{
+      const r = await fetch(API + '/auth/login', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ email: email.value.trim(), password: password.value })
+      });
+      const d = await r.json();
+      if(!r.ok){ msg.className='msg err'; msg.textContent = d.detail || 'تعذّر الدخول'; return false; }
+      // ملاحظة أمنية: للإنتاج يُفضّل تحويل الرمز إلى HttpOnly Cookie من الخادم بدل التخزين هنا.
+      const store = remember.checked ? localStorage : sessionStorage;
+      store.setItem('access', d.access); store.setItem('refresh', d.refresh);
+      msg.className='msg ok'; msg.textContent='تم الدخول ✓';
+      // location.href = '/owner';   ← وجّه للوحة المناسبة حسب الدور
+    }catch(_){ msg.className='msg err'; msg.textContent='خطأ في الاتصال'; }
+    return false;
+  }
+  function toggleLang(){
+    const en = document.documentElement.lang !== 'en';
+    document.documentElement.lang = en ? 'en' : 'ar';
+    document.documentElement.dir  = en ? 'ltr' : 'rtl';
+    document.querySelectorAll('[data-ar]').forEach(el => el.textContent = el.dataset[en?'en':'ar']);
+  }
+</script>
+</body>
+</html>
