@@ -1,6 +1,0 @@
-# متطلبات خدمة الويب (server.py + auth.py + reports.py) على Render
-# استبدل ملفك بهذا أو ادمج الأسطر — كلها لازمة حتى لا يفشل التحويل.
-fastapi
-uvicorn[standard]
-pydantic[email]
-PyJWT
